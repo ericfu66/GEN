@@ -4,6 +4,13 @@ export type ApiFailure = ApiErrorPayload & {
   requestId: string;
 };
 
+export function createRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
@@ -20,7 +27,7 @@ export async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
       code: payload.code ?? "UPSTREAM_ERROR",
       message: payload.message ?? `请求失败：${response.status}`,
       action: payload.action,
-      requestId: crypto.randomUUID()
+      requestId: createRequestId()
     } satisfies ApiFailure;
   }
   return data as T;

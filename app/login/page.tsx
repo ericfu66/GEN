@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { apiJson, type ApiFailure } from "@/lib/client/api";
+import { apiJson, createRequestId, type ApiFailure } from "@/lib/client/api";
 import { ToastDock } from "../components/ToastDock";
 import { ThemeToggle } from "../components/ThemeToggle";
 
@@ -12,7 +12,7 @@ type AuthForm = { email: string; password: string; name: string };
 function asFailure(error: unknown): ApiFailure {
   if (typeof error === "object" && error && "requestId" in error) return error as ApiFailure;
   return {
-    requestId: crypto.randomUUID(),
+    requestId: createRequestId(),
     status: 500,
     code: "UPSTREAM_ERROR",
     message: error instanceof Error ? error.message : "未知错误",

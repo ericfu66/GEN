@@ -2,7 +2,7 @@
 
 import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { apiJson, extractAssistantText, type ApiFailure } from "@/lib/client/api";
+import { apiJson, createRequestId, extractAssistantText, type ApiFailure } from "@/lib/client/api";
 import { useWorkspace } from "@/lib/client/store";
 import type { ChatMessage, SafeProviderConfig } from "@/lib/types";
 import { ConfigPanel } from "./components/ConfigPanel";
@@ -29,7 +29,7 @@ function readFileAsDataUrl(file: File) {
 function asFailure(error: unknown): ApiFailure {
   if (typeof error === "object" && error && "requestId" in error) return error as ApiFailure;
   return {
-    requestId: crypto.randomUUID(),
+    requestId: createRequestId(),
     status: 500,
     code: "UPSTREAM_ERROR",
     message: error instanceof Error ? error.message : "未知错误",

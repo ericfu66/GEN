@@ -24,17 +24,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("qy-theme") as Theme | null;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const saved = readStoredTheme();
+    const prefersDark = safePrefersDark();
     const initial: Theme = saved ?? (prefersDark ? "dark" : "light");
     setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial);
+    setDocumentTheme(initial);
   }, []);
 
   useEffect(() => {
     if (mounted) {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("qy-theme", theme);
+      setDocumentTheme(theme);
+      writeStoredTheme(theme);
     }
   }, [theme, mounted]);
 
@@ -47,4 +47,37 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
+}
+
+function readStoredTheme(): Theme | null {
+  try {
+    const value = window.localStorage.getItem("qy-theme");
+    return value === "dark" || value === "light" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredTheme(theme: Theme) {
+  try {
+    window.localStorage.setItem("qy-theme", theme);
+  } catch {
+    // Storage can be unavailable in restricted browser contexts.
+  }
+}
+
+function safePrefersDark() {
+  try {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  } catch {
+    return true;
+  }
+}
+
+function setDocumentTheme(theme: Theme) {
+  try {
+    document.documentElement.setAttribute("data-theme", theme);
+  } catch {
+    // Ignore non-browser edge cases.
+  }
 }

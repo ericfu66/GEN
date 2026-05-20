@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Copy, ScanSearch, Loader2, ImageIcon, Sparkles, X, ArrowUpRight, Wand2 } from "lucide-react";
-import { apiJson, type ApiFailure } from "@/lib/client/api";
+import { apiJson, createRequestId, type ApiFailure } from "@/lib/client/api";
 import type { SafeProviderConfig } from "@/lib/types";
 import { TopBar } from "../components/TopBar";
 import { ToastDock } from "../components/ToastDock";
@@ -14,7 +14,7 @@ type MeResponse = { user: { id: string; email: string; name: string } | null; co
 function asFailure(error: unknown): ApiFailure {
   if (typeof error === "object" && error && "requestId" in error) return error as ApiFailure;
   return {
-    requestId: crypto.randomUUID(),
+    requestId: createRequestId(),
     status: 500,
     code: "UPSTREAM_ERROR",
     message: error instanceof Error ? error.message : "未知错误",
